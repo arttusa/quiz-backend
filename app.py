@@ -5,24 +5,18 @@ import requests
 import json
 import sqlite3
 
-app = Flask(__name__)
-CORS(app)
+
+app = Flask(__name__, static_folder='quiz/build', static_url_path='')
+cors = CORS(app)
 
 if __name__ == "__main__": 
-        app.run()
+    app.run()
 
-"""
-app = Flask(__name__ 
-    ,static_folder='quiz/build',static_url_path='')
-cors = CORS(app)
-"""
-
-"""
 @app.route('/')
 def serve():
     return send_from_directory(app.static_folder, 'index.html')
 
-"""
+
 
 """
 HTTP GET Returns list of 10 questions where each item is:
