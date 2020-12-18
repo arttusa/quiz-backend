@@ -9,14 +9,13 @@ import sqlite3
 app = Flask(__name__, static_folder='quiz/build', static_url_path='')
 cors = CORS(app)
 
-if __name__ == "__main__": 
-    app.run()
 
 @app.route('/')
 def serve():
     return send_from_directory(app.static_folder, 'index.html')
 
-
+if __name__ == '__main__':
+    app.run(host='0.0.0.0')
 
 """
 HTTP GET Returns list of 10 questions where each item is:
