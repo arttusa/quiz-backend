@@ -6,7 +6,7 @@ import json
 import sqlite3
 
 
-app = Flask(__name__, static_folder='quiz/build', static_url_path='')
+app = Flask(__name__, static_folder='client/build', static_url_path='')
 cors = CORS(app)
 
 
