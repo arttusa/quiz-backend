@@ -5,6 +5,7 @@ import requests
 import json
 import sqlite3
 
+# TODO! Check encoding and take off cross_origin so only internal requests are allowed
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 cors = CORS(app)
@@ -31,7 +32,6 @@ HTTP GET Returns list of 10 questions where each item is:
 }
 """
 @app.route('/api/questions')
-@cross_origin()
 def questions():
     questions = fetchQuestions()
     parsedQuestions = parseQuestions(questions)
@@ -41,7 +41,6 @@ def questions():
 HTTP GET Returns list of 10 best scores
 """
 @app.route('/api/scoreboard')
-@cross_origin()
 def scoreboard():
     scoreboard = getScoreboardDB()
     return jsonify(scoreboard)
@@ -55,7 +54,6 @@ Returns updated scoreboard
 }
 """
 @app.route('/api/addscore', methods=['POST'])
-@cross_origin()
 def addscore():
     if request.method == 'POST': 
         res = json.loads(request.data) 
