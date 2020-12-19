@@ -4,6 +4,7 @@ from random import randrange
 import requests
 import json
 import sqlite3
+import base64
 
 # TODO! Check encoding and take off cross_origin so only internal requests are allowed
 
@@ -32,6 +33,7 @@ HTTP GET Returns list of 10 questions where each item is:
 }
 """
 @app.route('/api/questions')
+@cross_origin()
 def questions():
     questions = fetchQuestions()
     parsedQuestions = parseQuestions(questions)
@@ -41,6 +43,7 @@ def questions():
 HTTP GET Returns list of 10 best scores
 """
 @app.route('/api/scoreboard')
+@cross_origin()
 def scoreboard():
     scoreboard = getScoreboardDB()
     return jsonify(scoreboard)
@@ -54,6 +57,7 @@ Returns updated scoreboard
 }
 """
 @app.route('/api/addscore', methods=['POST'])
+@cross_origin()
 def addscore():
     if request.method == 'POST': 
         res = json.loads(request.data) 
@@ -64,7 +68,8 @@ def addscore():
 
 
 def fetchQuestions():
-    res = requests.get("https://opentdb.com/api.php?amount=10&category=9&difficulty=medium&type=multiple")
+    # https://opentdb.com/api.php?amount=10&category=9&difficulty=medium&type=multiple
+    res = requests.get("https://opentdb.com/api.php?amount=10&category=9&difficulty=medium&type=multiple&encode=base64")
     resJSON = json.loads(res.content)
     return resJSON  
 
@@ -74,15 +79,25 @@ def parseQuestions(questions):
     parsedQuestions = []
     for element in questionList:
         answers = element['incorrect_answers']
-        answers.insert(randrange(len(answers)+1), element['correct_answer'])
+        for i, answer in enumerate(answers):
+            print(answer, type(answer))
+            answers[i] = parseBase64(answer)
+
+        answers.insert(randrange(len(answers)+1), parseBase64(element['correct_answer']))
         data = {
-            "question": element['question'],
+            "question": parseBase64(element['question']),
             "answers": answers,
-            "correct_answer": element['correct_answer']
+            "correct_answer": parseBase64(element['correct_answer'])
         }
         parsedQuestions.append(data)
     return parsedQuestions
     
+
+def parseBase64(input):
+    message_bytes = base64.b64decode(input)
+    message = message_bytes.decode('UTF-8')
+    return message
+
 
 def insertScoreDB(name, score):
     conn = sqlite3.connect("scoreboard.db")
