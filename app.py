@@ -33,7 +33,6 @@ HTTP GET Returns list of 10 questions where each item is:
 }
 """
 @app.route('/api/questions')
-@cross_origin()
 def questions():
     questions = fetchQuestions()
     parsedQuestions = parseQuestions(questions)
@@ -43,7 +42,6 @@ def questions():
 HTTP GET Returns list of 10 best scores
 """
 @app.route('/api/scoreboard')
-@cross_origin()
 def scoreboard():
     scoreboard = getScoreboardDB()
     return jsonify(scoreboard)
@@ -57,7 +55,6 @@ Returns updated scoreboard
 }
 """
 @app.route('/api/addscore', methods=['POST'])
-@cross_origin()
 def addscore():
     if request.method == 'POST': 
         res = json.loads(request.data) 
@@ -68,7 +65,6 @@ def addscore():
 
 
 def fetchQuestions():
-    # https://opentdb.com/api.php?amount=10&category=9&difficulty=medium&type=multiple
     res = requests.get("https://opentdb.com/api.php?amount=10&category=9&difficulty=medium&type=multiple&encode=base64")
     resJSON = json.loads(res.content)
     return resJSON  
