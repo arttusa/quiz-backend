@@ -6,12 +6,11 @@ import json
 import sqlite3
 import base64
 
-# TODO! Check encoding and take off cross_origin so only internal requests are allowed
 
 app = Flask(__name__, static_folder='client/build', static_url_path='')
 cors = CORS(app)
 
-
+# Main route for game
 @app.route('/')
 def serve():
     return send_from_directory(app.static_folder, 'index.html')
@@ -33,6 +32,7 @@ HTTP GET Returns list of 10 questions where each item is:
 }
 """
 @app.route('/api/questions')
+@cross_origin()
 def questions():
     questions = fetchQuestions()
     parsedQuestions = parseQuestions(questions)
@@ -42,6 +42,7 @@ def questions():
 HTTP GET Returns list of 10 best scores
 """
 @app.route('/api/scoreboard')
+@cross_origin()
 def scoreboard():
     scoreboard = getScoreboardDB()
     return jsonify(scoreboard)
@@ -55,6 +56,7 @@ Returns updated scoreboard
 }
 """
 @app.route('/api/addscore', methods=['POST'])
+@cross_origin()
 def addscore():
     if request.method == 'POST': 
         res = json.loads(request.data) 
@@ -63,13 +65,18 @@ def addscore():
         return jsonify(updatedScoreboard)
     
 
-
+"""
+Fetches questions from Trivia API
+"""
 def fetchQuestions():
     res = requests.get("https://opentdb.com/api.php?amount=10&category=9&difficulty=medium&type=multiple&encode=base64")
     resJSON = json.loads(res.content)
     return resJSON  
 
-
+"""
+Parses necessary information (question, answers, correct answer) from given data
+@param questions is JSON-response that has been fetched from Trivia API
+"""
 def parseQuestions(questions):
     questionList = questions['results']
     parsedQuestions = []
@@ -89,12 +96,20 @@ def parseQuestions(questions):
     return parsedQuestions
     
 
+"""
+Parses input from base64 to UTF-8  
+@param input is base64 string
+"""
 def parseBase64(input):
     message_bytes = base64.b64decode(input)
     message = message_bytes.decode('UTF-8')
     return message
 
-
+"""
+Inserts given data to database
+@param name is players name
+@param score is players score
+"""
 def insertScoreDB(name, score):
     conn = sqlite3.connect("scoreboard.db")
     c = conn.cursor()
@@ -103,7 +118,9 @@ def insertScoreDB(name, score):
     c.execute("COMMIT TRANSACTION")
 
 
-
+"""
+Returns array of top ten results from database
+"""
 def getScoreboardDB():
     conn = sqlite3.connect("scoreboard.db")
     c = conn.cursor()
